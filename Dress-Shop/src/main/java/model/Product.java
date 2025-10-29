@@ -3,8 +3,6 @@ import java.math.BigDecimal;
 public class Product {
     private int id;
     private String sku;
-    
-    
     private String name;
     private BigDecimal price;
     private int stock;
