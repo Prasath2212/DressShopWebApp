@@ -1,14 +1,13 @@
-# Use official Tomcat image with JDK 17
+# Step 1: Use Maven to build the project
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+# Step 2: Use Tomcat to run the WAR
 FROM tomcat:9.0-jdk17-temurin
-
-# Remove the default ROOT webapp from Tomcat
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# Copy your generated WAR file into Tomcat's webapps directory
-COPY target/*.war /usr/local/tomcat/webapps/ROOT.war
-
-# Expose port 8080 (Render will automatically map this)
 EXPOSE 8080
-
-# Start Tomcat server
 CMD ["catalina.sh", "run"]
