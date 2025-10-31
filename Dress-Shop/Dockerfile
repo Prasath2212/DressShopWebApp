@@ -1,27 +1,28 @@
-# Use Tomcat with JDK 17
+# Use Tomcat 10 + JDK 17
 FROM tomcat:10.1-jdk17
 
 WORKDIR /usr/local/tomcat
 
-# Remove default ROOT webapp
+# Remove default ROOT app
 RUN rm -rf webapps/ROOT
 
-# Copy JSPs, HTML, etc.
+# Copy JSPs and WEB-INF files
 COPY src/main/webapp/ webapps/ROOT/
 
 # Copy Java source files
 COPY src/main/java/ /tmp/java/
 
-# Compile servlets and classes with Tomcat's servlet-api.jar on classpath
+# Copy local dependencies (Gson, MySQL, etc.)
+# Make sure you have them inside a 'lib' folder in your project
+COPY lib/*.jar /usr/local/tomcat/lib/
+
+# Compile your servlets and Java classes
 RUN mkdir -p webapps/ROOT/WEB-INF/classes && \
-    javac -cp /usr/local/tomcat/lib/servlet-api.jar \
+    javac -cp "/usr/local/tomcat/lib/*" \
           -d webapps/ROOT/WEB-INF/classes \
           $(find /tmp/java -name "*.java")
 
-# Copy any required libraries (like MySQL connector)
-COPY lib/*.jar webapps/ROOT/WEB-INF/lib/
-
-# Expose port
+# Expose default Tomcat port
 EXPOSE 8080
 
 # Start Tomcat
