@@ -1,13 +1,17 @@
-# Step 1: Use Maven to build the project
-FROM maven:3.9.6-eclipse-temurin-17 AS build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
-
-# Step 2: Use Tomcat to run the WAR
+# Use Tomcat with Java 17
 FROM tomcat:9.0-jdk17-temurin
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
-COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
+# Remove default ROOT webapp
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+
+# Copy your JSP project into Tomcat webapps
+COPY ./WebContent /usr/local/tomcat/webapps/ROOT
+
+# Copy compiled classes (if you have /src folder with servlets)
+COPY ./src /usr/local/tomcat/webapps/ROOT/WEB-INF/classes
+
+# Expose Tomcat port
 EXPOSE 8080
+
+# Start Tomcat
 CMD ["catalina.sh", "run"]
