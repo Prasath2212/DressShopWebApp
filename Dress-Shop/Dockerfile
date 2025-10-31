@@ -1,20 +1,21 @@
-# Use official Tomcat 10 with JDK 17
+# Use official Tomcat with JDK
 FROM tomcat:10.1-jdk17
 
-# Set working directory
 WORKDIR /usr/local/tomcat
 
-# Remove default ROOT webapp
+# Remove default ROOT app
 RUN rm -rf webapps/ROOT
 
-# Copy JSP and assets
+# Copy source code
 COPY src/main/webapp/ webapps/ROOT/
+COPY src/main/java/ /tmp/java/
 
-# Copy compiled servlet classes (from Eclipse build output)
-COPY build/classes/ webapps/ROOT/WEB-INF/classes/
+# Compile Java files into Tomcat classes folder
+RUN mkdir -p webapps/ROOT/WEB-INF/classes && \
+    javac -d webapps/ROOT/WEB-INF/classes $(find /tmp/java -name "*.java")
 
-# Expose default port
+# Expose port
 EXPOSE 8080
 
-# Start Tomcat server
+# Start Tomcat
 CMD ["catalina.sh", "run"]
